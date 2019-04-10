@@ -2,6 +2,7 @@ package hu.szte.mobilalk.maf_02;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -88,21 +89,24 @@ public class MainActivity extends AppCompatActivity
 
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        /*Toast toast = Toast.makeText(getApplicationContext(), item.getTitle(),
-                Toast.LENGTH_SHORT);
-        toast.show();*/
 
-        if(id == R.id.item_async) {
-            //new SleeperTask(this.helloView).execute();
-            getSupportLoaderManager().restartLoader(0, null,
-                    this);
-        } else if(id == R.id.item_book){
-            Intent intent = new Intent(this, BookActivity.class);
-            startActivityForResult(intent, TEXT_REQUEST);
-        } else if(id == R.id.item_broadcast) {
-            startBroadcasting();
-        } else if(id == R.id.item_notify) {
-            notifyUser();
+        switch(id) {
+            case R.id.item_async:
+                getSupportLoaderManager().restartLoader(0, null,
+                        this);
+                break;
+            case R.id.item_book:
+                Intent intent = new Intent(this, BookActivity.class);
+                startActivityForResult(intent, TEXT_REQUEST);
+                break;
+            case R.id.item_broadcast:
+                startBroadcasting();
+                break;
+            case R.id.item_notify:
+                notifyUser();
+                break;
+            default:
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -111,6 +115,10 @@ public class MainActivity extends AppCompatActivity
     public void notifyUser() {
 
         CharSequence channelName = null;
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(this, 0, intent, 0);
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             channelName = "myNotfifChannel";
@@ -130,6 +138,8 @@ public class MainActivity extends AppCompatActivity
                 .setSmallIcon(R.drawable.ic_launcher_background)
                 .setContentTitle("MAF_02")
                 .setContentText(this.helloView.getText())
+                        .setContentIntent(pendingIntent)
+                        .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
 
         NotificationManagerCompat notifcationManager = NotificationManagerCompat.from(this);
