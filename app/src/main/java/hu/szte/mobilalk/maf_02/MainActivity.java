@@ -1,5 +1,6 @@
 package hu.szte.mobilalk.maf_02;
 
+import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -10,6 +11,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Message;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -38,6 +40,9 @@ public class MainActivity extends AppCompatActivity
     private TextView helloView;
 
     private BroadcastReceiver br;
+    private AlarmManager mAlarmManager;
+
+    private PendingIntent alarmPendingIntent;
 
     public static final String EXTRA_MESSAGE = "hu.szte.mobilalk.maf_02.MESSAGE";
     public static final int TEXT_REQUEST = 1;
@@ -74,6 +79,9 @@ public class MainActivity extends AppCompatActivity
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);*/
         this.registerReceiver(br, filter);
+
+        this.mAlarmManager =
+                (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
     }
 
     @Override
@@ -105,11 +113,36 @@ public class MainActivity extends AppCompatActivity
             case R.id.item_notify:
                 notifyUser();
                 break;
+            case R.id.item_alarm:
+                setAlarm();
+                break;
+            case R.id.item_cancel_alarm:
+                cancelAlarm();
+                break;
             default:
                 break;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void setAlarm() {
+        Intent intent = new Intent();
+        intent.setAction(broadcastIntent);
+        this.alarmPendingIntent =
+                PendingIntent.getBroadcast(this, 0, intent, 0);
+
+        this.mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + 4 * 1000,
+                3*1000, alarmPendingIntent);
+
+    }
+
+    public void cancelAlarm() {
+        if(this.mAlarmManager != null) {
+            this.mAlarmManager.cancel(this.alarmPendingIntent);
+        }
+
     }
 
     public void notifyUser() {
@@ -119,6 +152,7 @@ public class MainActivity extends AppCompatActivity
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(this, 0, intent, 0);
+
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             channelName = "myNotfifChannel";
