@@ -30,6 +30,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Calendar;
+
 public class MainActivity extends AppCompatActivity
     implements LoaderManager.LoaderCallbacks<String> {
 
@@ -132,9 +134,15 @@ public class MainActivity extends AppCompatActivity
         this.alarmPendingIntent =
                 PendingIntent.getBroadcast(this, 0, intent, 0);
 
-        this.mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + 4 * 1000,
-                3*1000, alarmPendingIntent);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 17);
+        calendar.set(Calendar.MINUTE, 11);
+
+
+        this.mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
+                calendar.getTimeInMillis(),
+                60*1000, alarmPendingIntent);
 
     }
 
